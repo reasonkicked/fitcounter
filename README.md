@@ -1,2 +1,2 @@
 # fitcounter
-Just another fit
+Just another fit app.
