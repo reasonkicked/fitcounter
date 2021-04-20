@@ -1,0 +1,4 @@
+
+        [console_scripts]
+        fitcounter=fitcounter.__main__:main
+    

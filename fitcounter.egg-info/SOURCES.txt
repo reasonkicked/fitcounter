@@ -1,0 +1,8 @@
+README.md
+setup.py
+fitcounter.egg-info/PKG-INFO
+fitcounter.egg-info/SOURCES.txt
+fitcounter.egg-info/dependency_links.txt
+fitcounter.egg-info/entry_points.txt
+fitcounter.egg-info/requires.txt
+fitcounter.egg-info/top_level.txt
