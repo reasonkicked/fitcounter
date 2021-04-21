@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, SubmitField
 import pdb
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -10,103 +12,88 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://fitcounter:CluLnxPa$$@192.
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-class CarsModel(db.Model):
-    __tablename__ = 'cars'
+
+class MealsModel(db.Model):
+    __tablename__ = 'meals'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String())
-    model = db.Column(db.String())
-    doors = db.Column(db.Integer())
+    title = db.Column(db.String())
+    description = db.Column(db.String())
+    price = db.Column(db.Float())
 
-    def __init__(self, name, model, doors):
-        self.name = name
-        self.model = model
-        self.doors = doors
+    def __init__(self, title, description, price):
+        self.title = title
+        self.description = description
+        self.price = price
 
     def __repr__(self):
-        return f"<Car {self.name}>"
+        return f"<meal {self.title}>"
 
 
-@app.route('/cars', methods=['POST', 'GET'])
-def handle_cars():
+class DeleteMealForm(FlaskForm):
+    submit = SubmitField("Delete item")
+
+
+@app.route('/new_meal', methods=['POST', 'GET'])
+def handle_meals():
     if request.method == 'POST':
-        name = request.form.get("title")
-        model = request.form.get("description")
-        new_car = CarsModel(name=name, model=model, doors=4)
-        db.session.add(new_car)
+        title = request.form.get("title")
+        description = request.form.get("description")
+        new_meal = MealsModel(title=title, description=description, price=4)
+        db.session.add(new_meal)
         db.session.commit()
-        return render_template("cars.html")
+        return render_template("new_meal.html")
 
     elif request.method == 'GET':
-        cars = CarsModel.query.all()
+        meals = MealsModel.query.all()
         results = [
             {
-                "name": car.name,
-                "model": car.model,
-                "doors": car.doors
-            } for car in cars]
+                "name": meal.title,
+                "model": meal.description,
+                "doors": meal.price
+            } for meal in meals]
 
-        # return {"count": len(results), "cars": results}
-        return render_template("cars.html", results=results)
+        # return {"count": len(results), "meals": results}
+        return render_template("new_meal.html", results=results)
 
 
-@app.route('/cars/<car_id>', methods=['GET', 'PUT', 'DELETE'])
-def handle_car(car_id):
-    car = CarsModel.query.get_or_404(car_id)
+@app.route('/meals/<meal_id>', methods=['POST', 'GET', 'PUT', 'DELETE'])
+def handle_meal(meal_id):
+    meal = MealsModel.query.get_or_404(meal_id)
 
     if request.method == 'GET':
         response = {
-            "name": car.name,
-            "model": car.model,
-            "doors": car.doors
+            "title": meal.title,
+            "description": meal.description,
+            "price": meal.price
         }
-        return render_template("modify_car.html", response=response)
+
+        return render_template("modify_meal.html", meal_id=meal_id, response=response)
 
     elif request.method == 'POST':
-        name = request.form.get("title")
-        model = request.form.get("description")
-        new_car = CarsModel(name=name, model=model, doors=4)
-        db.session.add(new_car)
-        db.session.commit()
-        return render_template("modify_car.html")
+        meal.title = request.form.get("title")
+        meal.description = request.form.get("description")
+        meal.price = request.form.get("price")
 
-    elif request.method == 'PUT':
-        data = request.get_json()
-        car.name = data['name']
-        car.model = data['model']
-        car.doors = data['doors']
-        db.session.add(car)
         db.session.commit()
-        return {"message": f"car {car.name} successfully updated"}
+        return render_template("modify_meal.html")
 
-    elif request.method == 'DELETE':
-        db.session.delete(car)
-        db.session.commit()
-        return {"message": f"Car {car.name} successfully deleted."}
+    return redirect(url_for("home"))
 
+"""
+@app.route('/meal<int:meal_id>/delete', methods=["POST", "GET"])
+def delete_meal(meal_id):
+    meal = MealsModel.query.get_or_404(meal_id)
+
+    deleteMealForm = DeleteMealForm()
+
+    db.session.delete(meal)
+    db.session.commit()
+    return render_template()
+"""
 
 @app.route("/")
 def home():
     return render_template("home.html")
 
 
-@app.route("/item/new", methods=["GET", "POST"])
-def new_item():
-    if request.method == "POST":
-        # Process the form data
-        print("Form data:")
-        print("Title: {}, Description: {}".format(
-            request.form.get("title"), request.form.get("description")
-        ))
-        # redirect to some page
-        return redirect(url_for("home"))
-
-    return render_template("new_item.html")
-
-
-
-
-
-if __name__ == "__main__":
-    home()
-    #  print("File one executed when ran directly")

@@ -1,15 +1,19 @@
 {% extends 'base.html' %}
-{% set active_page = 'new_item' %}
-{% block title %}Add new item - {% endblock %}
+{% set active_page = 'modify_meal' %}
+{% block title %}Modify meal - {% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-lg-7 offset-lg-2 my-5">
-        <h1>Add new item</h1><hr>
-        <form method="POST" action="{{ url_for('new_item') }}">
+        <h1>Modify item</h1><hr>
+        <form method="POST" action="{{ url_for('handle_meal', meal_id=meal_id) }}">
             <div class="form-group">
                 <label> Title</label>
                 <input class="form-control" type="text" name="title">
+            </div>
+             <div class="form-group">
+                <label>Price</label>
+                <textarea class="form-control" name="price" rows="3"></textarea>
             </div>
             <div class="form-group">
                 <label>Description</label>
@@ -20,4 +24,6 @@
         </form>
     </div>
 </div>
+{{ response }}
+
 {% endblock %}
