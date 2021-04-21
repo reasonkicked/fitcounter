@@ -17,4 +17,3 @@ class Vegetables:
 class Drinks:
     def __init__(self):
         pass
-

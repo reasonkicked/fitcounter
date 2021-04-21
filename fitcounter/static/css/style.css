@@ -1,7 +1,7 @@
 body {
     font-family: sans-serif;
     color: black;
-    background-color: lightblue;
+    background-color: snow;
     }
 
 .navbar-brand {
@@ -11,4 +11,12 @@ body {
 
 .card-img-top {
     object-fit: cover;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+textarea {
+    resize: none;
 }
