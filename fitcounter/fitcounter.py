@@ -80,7 +80,18 @@ def handle_meal(meal_id):
 
     return redirect(url_for("home"))
 
-"""
+@app.route('/meal/<meal_id>', methods=['GET'])
+def view_meal(meal_id):
+    meal = MealsModel.query.get_or_404(meal_id)
+    if request.method == 'GET':
+        response = {
+            "title": meal.title,
+            "description": meal.description,
+            "price": meal.price
+        }
+        return render_template("meal.html", meal_id=meal_id, response=response)
+
+
 @app.route('/meal<int:meal_id>/delete', methods=["POST", "GET"])
 def delete_meal(meal_id):
     meal = MealsModel.query.get_or_404(meal_id)
@@ -90,7 +101,7 @@ def delete_meal(meal_id):
     db.session.delete(meal)
     db.session.commit()
     return render_template()
-"""
+
 
 @app.route("/")
 def home():
