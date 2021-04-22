@@ -136,12 +136,20 @@ def handle_meal(meal_id):
         return render_template("modify_meal.html", meal_id=meal.id, form=form)
 
     elif request.method == 'POST':
-        meal.title = request.form.get("title")
-        meal.description = request.form.get("description")
-        meal.price = request.form.get("price")
+        if form.validate_on_submit():
+            meal.title = request.form.get("title")
+            meal.description = request.form.get("description")
+            meal.price = request.form.get("price")
+            meal.category = request.form.get("category")
+            meal.subcategory = request.form.get("subcategory")
+            db.session.commit()
+            flash("Item {} has been successfully updated".format(form.title.data), "success")
+        if form.errors:
+            flash("{}".format(form.errors), "danger")
 
-        db.session.commit()
-        return redirect(url_for("home"))
+            return redirect(url_for("view_meal", meal_id=meal.id))
+
+
 
     return redirect(url_for("home"))
 
