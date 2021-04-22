@@ -9,6 +9,7 @@
       </div>
     </div>
     <div class="col-lg-9">
+        {% if meals %}
       <div class="row my-5 card-wrapper">
           {% for meal in meals %}
         <div class="col-lg-4 col-md-6 mb-4">
@@ -31,6 +32,9 @@
             </div>
         </div>
           {% endfor %}
+          {% else %}
+          <h1 class="offset-lg-3">No items to show.</h1>
+          {% endif %}
       </div>
     </div>
   </div>

@@ -23,11 +23,15 @@ class MealsModel(db.Model):
     title = db.Column(db.String())
     description = db.Column(db.String())
     price = db.Column(db.Float())
+    category = db.Column(db.String())
+    subcategory = db.Column(db.String())
 
-    def __init__(self, title, description, price):
+    def __init__(self, title, description, price, category, subcategory):
         self.title = title
         self.description = description
         self.price = price
+        self.category = category
+        self.subcategory = subcategory
 
     def __repr__(self):
         return f"<meal {self.title}>"
@@ -42,7 +46,11 @@ def handle_meals():
     if request.method == 'POST':
         title = request.form.get("title")
         description = request.form.get("description")
-        new_meal = MealsModel(title=title, description=description, price=4)
+        price = request.form.get("price")
+        category = request.form.get("category")
+        subcategory = request.form.get("subcategory")
+        new_meal = MealsModel(title=title, description=description, price=price, category=category,
+                              subcategory=subcategory)
         db.session.add(new_meal)
         db.session.commit()
         return render_template("new_meal.html")
@@ -51,9 +59,11 @@ def handle_meals():
         meals = MealsModel.query.all()
         results = [
             {
-                "name": meal.title,
-                "model": meal.description,
-                "doors": meal.price
+                "title": meal.title,
+                "description": meal.description,
+                "price": meal.price,
+                "category": meal.category,
+                "subcategory": meal.subcategory
             } for meal in meals]
 
         # return {"count": len(results), "meals": results}
@@ -68,7 +78,9 @@ def handle_meal(meal_id):
         response = {
             "title": meal.title,
             "description": meal.description,
-            "price": meal.price
+            "price": meal.price,
+            "category": meal.category,
+            "subcategory": meal.subcategory
         }
 
         return render_template("modify_meal.html", meal_id=meal_id, response=response)
@@ -91,7 +103,9 @@ def view_meal(meal_id):
         response = {
             "title": meal.title,
             "description": meal.description,
-            "price": meal.price
+            "price": meal.price,
+            "category": meal.category,
+            "subcategory": meal.subcategory
         }
         delete_meal_form = DeleteMealForm()
         return render_template("meal.html", meal=meal, delete_meal_form=delete_meal_form, response=response)
