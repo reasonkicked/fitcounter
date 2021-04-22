@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField
+from wtforms import StringField, TextAreaField, SubmitField, SelectField
 import pdb
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -37,12 +37,23 @@ class MealsModel(db.Model):
         return f"<meal {self.title}>"
 
 
+class NewItemForm(FlaskForm):
+    title = StringField("Title")
+    price = StringField("Price")
+    description = TextAreaField("Description")
+    category = SelectField("Category")
+    subcategory = SelectField("Subcategory")
+    submit = SubmitField("Submit")
+
+
 class DeleteMealForm(FlaskForm):
     submit = SubmitField("Delete item")
 
 
 @app.route('/new_meal', methods=['POST', 'GET'])
 def handle_meals():
+    form = NewItemForm()
+
     if request.method == 'POST':
         title = request.form.get("title")
         description = request.form.get("description")
@@ -53,21 +64,11 @@ def handle_meals():
                               subcategory=subcategory)
         db.session.add(new_meal)
         db.session.commit()
-        return render_template("new_meal.html")
 
-    elif request.method == 'GET':
-        meals = MealsModel.query.all()
-        results = [
-            {
-                "title": meal.title,
-                "description": meal.description,
-                "price": meal.price,
-                "category": meal.category,
-                "subcategory": meal.subcategory
-            } for meal in meals]
+        flash("Meal {} has been successfully submitted".format(request.form.get("title")), "success")
+        return redirect((url_for("home")))
 
-        # return {"count": len(results), "meals": results}
-        return render_template("new_meal.html", results=results)
+    return render_template("new_meal.html", form=form)
 
 
 @app.route('/meals/<meal_id>', methods=['POST', 'GET', 'PUT', 'DELETE'])
