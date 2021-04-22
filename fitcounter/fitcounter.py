@@ -82,7 +82,11 @@ class NewItemForm(FlaskForm):
 
 
 class DeleteMealForm(FlaskForm):
-    submit = SubmitField("Delete item")
+    submit = SubmitField("Delete meal")
+
+
+class ModifyMealForm(FlaskForm):
+    submit = SubmitField("Modify meal")
 
 
 @app.route('/new_meal', methods=['POST', 'GET'])
@@ -123,6 +127,11 @@ def handle_meal(meal_id):
     form.subcategory.choices = subcategories
 
     if request.method == 'GET':
+        form.title.data = meal.title
+        form.price.data = meal.price
+        form.description.data = meal.description
+        form.category.data = meal.category
+        form.subcategory.data = meal.subcategory
 
         return render_template("modify_meal.html", meal_id=meal.id, form=form)
 
@@ -141,15 +150,11 @@ def handle_meal(meal_id):
 def view_meal(meal_id):
     meal = MealsModel.query.get_or_404(meal_id)
     if request.method == 'GET':
-        response = {
-            "title": meal.title,
-            "description": meal.description,
-            "price": meal.price,
-            "category": meal.category,
-            "subcategory": meal.subcategory
-        }
         delete_meal_form = DeleteMealForm()
-        return render_template("meal.html", meal=meal, delete_meal_form=delete_meal_form, response=response)
+        modify_meal_form = ModifyMealForm()
+        return render_template("meal.html", meal=meal,
+                               modify_meal_form=modify_meal_form,
+                               delete_meal_form=delete_meal_form)
 
 
 @app.route('/meal<int:meal_id>/delete', methods=["POST", "GET"])

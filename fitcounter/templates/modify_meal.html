@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row">
     <div class="col-lg-7 offset-lg-2 my-5">
-        <h1>Modify item</h1><hr>
+        <h1>Modify meal</h1><hr>
         <form method="POST" action="{{ url_for('handle_meal', meal_id=meal_id) }}">
             {{ form.hidden_tag() }}
             <div class="form-group">
