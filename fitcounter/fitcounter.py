@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField, SelectField
+from wtforms import StringField, TextAreaField, SubmitField, SelectField, DecimalField
+from wtforms.validators import InputRequired, DataRequired, Length
+
 import pdb
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -64,9 +66,16 @@ class Subategory(db.Model):
 
 
 class NewItemForm(FlaskForm):
-    title = StringField("Title")
-    price = StringField("Price")
-    description = TextAreaField("Description")
+    title = StringField("Title", validators=[InputRequired("Input is required!"),
+                                             DataRequired("Data is required!"),
+                                             Length(min=2, max=20,
+                                                    message="Input must be between 5 and 20 characters long!")])
+    price = DecimalField("Price")
+    description = TextAreaField("Description", validators=[InputRequired("Input is required!"),
+                                                           DataRequired("Data is required!"),
+                                                           Length(min=2, max=50,
+                                                                  message=
+                                                                  "Input must be between 2 and 50 characters long!")])
     category = SelectField("Category")
     subcategory = SelectField("Subcategory")
     submit = SubmitField("Submit")
@@ -83,39 +92,39 @@ def handle_meals():
     subcategories = Subategory.query.all()
     form.category.choices = categories
     form.subcategory.choices = subcategories
-    print(subcategories)
 
-    if request.method == 'POST':
-        title = request.form.get("title")
-        description = request.form.get("description")
-        price = request.form.get("price")
-        category = request.form.get("category")
-        subcategory = request.form.get("subcategory")
-        new_meal = MealsModel(title=title, description=description, price=price, category=category,
-                              subcategory=subcategory)
-        db.session.add(new_meal)
-        db.session.commit()
+    if form.validate_on_submit():
+        if request.method == 'POST':
+            title = request.form.get("title")
+            description = request.form.get("description")
+            price = request.form.get("price")
+            category = request.form.get("category")
+            subcategory = request.form.get("subcategory")
+            new_meal = MealsModel(title=title, description=description, price=price, category=category,
+                                  subcategory=subcategory)
+            db.session.add(new_meal)
+            db.session.commit()
 
-        flash("Meal {} has been successfully submitted".format(request.form.get("title")), "success")
-        return redirect((url_for("home")))
+            flash("Meal {} has been successfully submitted".format(request.form.get("title")), "success")
+            return redirect((url_for("home")))
 
+    if form.errors:
+        flash("{}".format(form.errors), "danger")
     return render_template("new_meal.html", form=form)
 
 
 @app.route('/meals/<meal_id>', methods=['POST', 'GET', 'PUT', 'DELETE'])
 def handle_meal(meal_id):
     meal = MealsModel.query.get_or_404(meal_id)
+    form = NewItemForm()
+    categories = Category.query.all()
+    subcategories = Subategory.query.all()
+    form.category.choices = categories
+    form.subcategory.choices = subcategories
 
     if request.method == 'GET':
-        response = {
-            "title": meal.title,
-            "description": meal.description,
-            "price": meal.price,
-            "category": meal.category,
-            "subcategory": meal.subcategory
-        }
 
-        return render_template("modify_meal.html", meal_id=meal_id, response=response)
+        return render_template("modify_meal.html", meal_id=meal.id, form=form)
 
     elif request.method == 'POST':
         meal.title = request.form.get("title")
@@ -123,7 +132,7 @@ def handle_meal(meal_id):
         meal.price = request.form.get("price")
 
         db.session.commit()
-        return render_template("modify_meal.html")
+        return redirect(url_for("home"))
 
     return redirect(url_for("home"))
 
@@ -161,5 +170,3 @@ def home():
     for meal in meals[:10]:
         items_from_db.append(meal)
     return render_template("home.html", meals=meals)
-
-

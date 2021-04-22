@@ -23,8 +23,8 @@
                 <h4 class="card-title">
                   <a href="{{ url_for('view_meal', meal_id=meal.id) }}">{{ meal.title }}</a>
                 </h4>
-                <h5>$2.00</h5>
-                <p class="card-text">Description</p>
+                <h5>{{ meal.price }}</h5>
+                <p class="card-text">{{ meal.description }}</p>
               </div>
               <div class="card-footer">
                 <small class="text-muted">Category -> Subcategory</small>
