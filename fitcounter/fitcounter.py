@@ -5,9 +5,12 @@ import pdb
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
+import os
 
 app = Flask(__name__)
 
+SECRET_KEY = os.urandom(32)
+app.config['SECRET_KEY'] = SECRET_KEY
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://fitcounter:CluLnxPa$$@192.168.1.131:5432/fitcounterdb"
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -80,6 +83,7 @@ def handle_meal(meal_id):
 
     return redirect(url_for("home"))
 
+
 @app.route('/meal/<meal_id>', methods=['GET'])
 def view_meal(meal_id):
     meal = MealsModel.query.get_or_404(meal_id)
@@ -89,22 +93,27 @@ def view_meal(meal_id):
             "description": meal.description,
             "price": meal.price
         }
-        return render_template("meal.html", meal_id=meal_id, response=response)
+        delete_meal_form = DeleteMealForm()
+        return render_template("meal.html", meal=meal, delete_meal_form=delete_meal_form, response=response)
 
 
 @app.route('/meal<int:meal_id>/delete', methods=["POST", "GET"])
 def delete_meal(meal_id):
     meal = MealsModel.query.get_or_404(meal_id)
 
-    deleteMealForm = DeleteMealForm()
+    delete_meal_form = DeleteMealForm()
 
     db.session.delete(meal)
     db.session.commit()
-    return render_template()
+    return redirect(url_for("home"))
 
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    items_from_db = []
+    meals = MealsModel.query.all()
+    for meal in meals[:10]:
+        items_from_db.append(meal)
+    return render_template("home.html", meals=meals)
 
 
