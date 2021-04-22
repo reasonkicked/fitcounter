@@ -37,6 +37,32 @@ class MealsModel(db.Model):
         return f"<meal {self.title}>"
 
 
+class Category(db.Model):
+    __tablename__ = 'categories'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String())
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return self.name
+
+
+class Subategory(db.Model):
+    __tablename__ = 'subcategories'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String())
+    category_id = db.Column(db.Integer())
+
+    def __init__(self, name, category_id):
+        self.name = name
+        self.category_id = category_id
+
+    def __repr__(self):
+        return self.name
+
+
 class NewItemForm(FlaskForm):
     title = StringField("Title")
     price = StringField("Price")
@@ -53,6 +79,11 @@ class DeleteMealForm(FlaskForm):
 @app.route('/new_meal', methods=['POST', 'GET'])
 def handle_meals():
     form = NewItemForm()
+    categories = Category.query.all()
+    subcategories = Subategory.query.all()
+    form.category.choices = categories
+    form.subcategory.choices = subcategories
+    print(subcategories)
 
     if request.method == 'POST':
         title = request.form.get("title")
