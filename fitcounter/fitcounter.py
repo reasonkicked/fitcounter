@@ -89,6 +89,14 @@ class ModifyMealForm(FlaskForm):
     submit = SubmitField("Modify meal")
 
 
+class FilterForm(FlaskForm):
+    title = StringField("Title", validators=[Length(max=20)])
+    price = SelectField("Price", coerce=int, choices=[(0, "---"), (1, "Max to Min"), (2, "Min to Max")])
+    category = SelectField("Category")
+    subcategory = SelectField("Subcategory")
+    submit = SubmitField("Filter")
+
+
 @app.route('/new_meal', methods=['POST', 'GET'])
 def handle_meals():
     form = NewItemForm()
@@ -149,8 +157,6 @@ def handle_meal(meal_id):
 
             return redirect(url_for("view_meal", meal_id=meal.id))
 
-
-
     return redirect(url_for("home"))
 
 
@@ -178,8 +184,19 @@ def delete_meal(meal_id):
 
 @app.route("/")
 def home():
+    form = FilterForm(request.args, meta={"csrf": False})
+    categories = Category.query.all()
+    subcategories = Subategory.query.all()
+    categories.insert(0, "---")
+    form.category.choices = categories
+    subcategories.insert(0, "---")
+    form.subcategory.choices = subcategories
+
+    if form.validate():
+        pass
+
     items_from_db = []
     meals = MealsModel.query.all()
     for meal in meals[:10]:
         items_from_db.append(meal)
-    return render_template("home.html", meals=meals)
+    return render_template("home.html", meals=meals, form=form)
